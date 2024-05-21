@@ -1,6 +1,4 @@
-import uuid
-from datetime import datetime
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm  import sessionmaker
 from user import User, Base
 from sqlalchemy.exc import InvalidRequestError
@@ -10,38 +8,41 @@ from sqlalchemy.orm.exc import NoResultFound
 class DB():
     def __init__(self):
         self.engine = create_engine("sqlite:///a.db", echo=False)
-        Base.metadata.drop_all(self.engine)
         Base.metadata.create_all(self.engine)
-        self.session = None
+        Session = sessionmaker(bind=self.engine)
+        self.session = Session()
 
-    def _session(self):
-        if self.session is None:
-            Session = sessionmaker(bind=self.engine)
-            self.session = Session()
-        return self.session
-
-    def add(self, email, hashed_password):
+    def add_user(self, email, hashed_password):
         user = User(email=email, hashed_password=hashed_password)
-        self._session.add(user)
-        self._session.commit()
+        self.session.add(user)
+        self.session.commit()
         return user
 
     def find_user(self, **kwargs):
-        if kwargs is None:
+        if not kwargs:
             raise InvalidRequestError
         column_names = User.__table__.columns.keys()
-        for key in kwargs.keys():
+        filters = []
+        for key, value in kwargs.items():
             if key not in column_names:
                 raise InvalidRequestError
-        user = self._session.query(User).filter_by(**kwargs).first()
-        if user is None:
+            column = getattr(User, key)
+            filters.append(column == value)
+        if not filters:
             raise NoResultFound
+        stment = select(User).where(*filters)
+        result = self.session.execute(stment)
+        user = result.scalars().first()
         return user
 
-    def update_user(self, user_id, **kwargs):
-        user = self.find_user_by(id=user_id)
+    def update_user(self, email, **kwargs):
+        user = self.find_user(email=email)
         for key, value in kwargs.items():
-            if key not in user.__table__.columns.keys():
+            if key not in User.__table__.columns.keys():
                 raise ValueError
             setattr(user, key, value)
-            self._session.commit()
+            self.session.commit()
+
+    def all(self):
+        users = self.session.scalars(select(User)).all()
+        return users

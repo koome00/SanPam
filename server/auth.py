@@ -5,6 +5,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import InvalidRequestError
 import uuid
 from typing import Optional, Union
+from user import User
 
 
 def _hash_password(password: str) -> bytes:
@@ -48,21 +49,21 @@ class Auth:
         credentials validation
         """
         try:
-            if self._db.find_user_by(email=email):
-                user = self._db.find_user_by(email=email)
+            user = self._db.find_user(email=email)
+            if user:
                 hashed = user.hashed_password
                 return bcrypt.checkpw(password.encode(), hashed)
         except (InvalidRequestError, NoResultFound):
-            return False
+            return self._db.all()
 
     def create_session(self, email: str) -> Union[str, None]:
         """
         creates session ID and returns a string
         """
         try:
-            user = self._db.find_user_by(email=email)
+            user = self._db.find_user(email=email)
             session_id = _generate_uuid()
-            self._db.update_user(user.id, session_id=session_id)
+            self._db.update_user(user.email, session_id=session_id)
             return session_id
         except (NoResultFound, InvalidRequestError, ValueError):
             return None
@@ -75,7 +76,7 @@ class Auth:
         if session_id is None:
             return None
         try:
-            user = self._db.find_user_by(session_id=session_id)
+            user = self._db.find_user(session_id=session_id)
             return user
         except NoResultFound:
             return None
@@ -91,7 +92,7 @@ class Auth:
         reset token
         """
         try:
-            user = self._db.find_user_by(email=email)
+            user = self._db.find_user(email=email)
             if user.reset_token:
                 return user.reset_token
             reset_token = _generate_uuid()
@@ -105,9 +106,13 @@ class Auth:
         updates password
         """
         try:
-            user = self._db.find_user_by(reset_token=reset_token)
+            user = self._db.find_user(reset_token=reset_token)
             hashed = _hash_password(password)
             self._db.update_user(user.id, reset_token=None,
                                  hashed_password=hashed)
         except (InvalidRequestError, NoResultFound):
             raise ValueError
+
+    def all(self):
+        users = User.all()
+        return users
