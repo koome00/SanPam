@@ -96,7 +96,7 @@ class Auth:
             if user.reset_token:
                 return user.reset_token
             reset_token = _generate_uuid()
-            self._db.update_user(user.id, reset_token=reset_token)
+            self._db.update_user(user.email, reset_token=reset_token)
             return reset_token
         except (InvalidRequestError, NoResultFound):
             raise ValueError
@@ -108,7 +108,7 @@ class Auth:
         try:
             user = self._db.find_user(reset_token=reset_token)
             hashed = _hash_password(password)
-            self._db.update_user(user.id, reset_token=None,
+            self._db.update_user(user.email, reset_token=None,
                                  hashed_password=hashed)
         except (InvalidRequestError, NoResultFound):
             raise ValueError

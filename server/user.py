@@ -23,6 +23,7 @@ class User(Base):
     created_at = mapped_column(String, nullable=False, default=datetime.utcnow)
     role = mapped_column(String)
     session_id = mapped_column(String)
+    reset_token = mapped_column(String)
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}: {self.__dict__}"
@@ -31,5 +32,3 @@ class User(Base):
     def to_dict(self):
         DATA = self.__dict__.copy()
         return DATA
-
-    
