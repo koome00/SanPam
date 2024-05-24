@@ -7,7 +7,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 class DB():
     def __init__(self):
-        self.engine = create_engine("sqlite:///a.db", echo=False)
+        self.engine = create_engine("sqlite:///database.db", echo=False)
         Base.metadata.create_all(self.engine)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
@@ -28,8 +28,6 @@ class DB():
                 raise InvalidRequestError
             column = getattr(User, key)
             filters.append(column == value)
-        if not filters:
-            raise NoResultFound
         stment = select(User).where(*filters)
         result = self.session.execute(stment)
         user = result.scalars().first()
@@ -37,12 +35,21 @@ class DB():
 
     def update_user(self, email, **kwargs):
         user = self.find_user(email=email)
+        if not user:
+            raise ValueError("User not found")
+        column_names = User.__table__.columns.keys()
         for key, value in kwargs.items():
-            if key not in User.__table__.columns.keys():
+            if key not in column_names:
                 raise ValueError
             setattr(user, key, value)
-            self.session.commit()
+        self.session.commit()
 
     def all(self):
         users = self.session.scalars(select(User)).all()
         return users
+
+manager = DB()
+all_users = manager.all()
+
+for user in all_users:
+    print(user)

@@ -4,12 +4,15 @@ Module 3: Flask App
 from flask import Flask, jsonify, request, abort, url_for, redirect
 from auth import Auth
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import InvalidRequestError
 from flask_cors import CORS
 from user import User
+from db import DB
 
 app = Flask(__name__)
 CORS(app, origins="*")
 AUTH = Auth()
+database = DB()
 
 
 @app.route("/", methods=["GET"])
@@ -25,15 +28,14 @@ def register_users():
     """
     endpoint to register user
     """
-    try:
-        email = request.form.get("email")
-        password = request.form.get("password")
-        AUTH.register_user(email=email, password=password)
-        
+    email = request.form.get("email")
+    password = request.form.get("password")
+    user = AUTH.register_user(email=email, password=password)
+    if user:
         return jsonify({"email": email,
-                        "message": "user created"})
-    except ValueError:
-        return jsonify({"message": "user exists"}), 400
+                    "message": f"User {email} created"}), 200
+    else:
+        return jsonify({"email": f"User {email} exists"}), 200
 
 
 @app.route("/sessions", methods=["POST"], strict_slashes=False)
@@ -50,7 +52,7 @@ def login():
         res.set_cookie("session_id", session_id)
         return res
     else:
-        return jsonify({"res": AUTH.valid_login(email, password)})
+        return jsonify({"res": "Email or password incorrect"})
 
 
 @app.route("/sessions", methods=["DELETE"], strict_slashes=False)
@@ -138,4 +140,8 @@ def forbidden(error) -> str:
 
 
 if __name__ == "__main__":
+    email = "koomemc@gmail.com"
+    user = User(email=email, hashed_password="123444")
+    result = database.find_user(email=email)
+    print(result)
     app.run(host="0.0.0.0", port="5000")

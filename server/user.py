@@ -18,7 +18,7 @@ class User(Base):
 
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     username = mapped_column(String(30))
-    email = mapped_column(String, nullable=False)
+    email = mapped_column(String, nullable=False, unique=True)
     hashed_password = mapped_column(String, nullable=False)
     created_at = mapped_column(String, nullable=False, default=datetime.utcnow)
     role = mapped_column(String)

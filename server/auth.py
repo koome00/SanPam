@@ -36,13 +36,14 @@ class Auth:
         """
         function to register user
         """
-        try:
-            if self._db.find_user(email=email):
-                raise ValueError(f"User {email} already exists")
-        except NoResultFound:
+        user = self._db.find_user(email=email)
+        if user is None:
             hashed = _hash_password(password)
             user = self._db.add_user(email=email, hashed_password=hashed)
             return user
+        else:
+            return None
+
 
     def valid_login(self, email: str, password: str) -> bool:
         """
