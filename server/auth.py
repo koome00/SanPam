@@ -49,24 +49,23 @@ class Auth:
         """
         credentials validation
         """
-        try:
-            user = self._db.find_user(email=email)
-            if user:
-                hashed = user.hashed_password
-                return bcrypt.checkpw(password.encode(), hashed)
-        except (InvalidRequestError, NoResultFound):
-            return self._db.all()
+        user = self._db.find_user(email=email)
+        if user:
+            hashed = user.hashed_password
+            return bcrypt.checkpw(password.encode(), hashed)
+        else:
+            return None
 
     def create_session(self, email: str) -> Union[str, None]:
         """
         creates session ID and returns a string
         """
-        try:
-            user = self._db.find_user(email=email)
+        user = self._db.find_user(email=email)
+        if user:
             session_id = _generate_uuid()
             self._db.update_user(user.email, session_id=session_id)
             return session_id
-        except (NoResultFound, InvalidRequestError, ValueError):
+        else:
             return None
 
     def get_user_from_session_id(self, session_id: str) -> Optional[User]:

@@ -35,13 +35,12 @@ class DB():
 
     def update_user(self, email, **kwargs):
         user = self.find_user(email=email)
-        if not user:
-            raise ValueError("User not found")
-        column_names = User.__table__.columns.keys()
-        for key, value in kwargs.items():
-            if key not in column_names:
-                raise ValueError
-            setattr(user, key, value)
+        if user:
+            column_names = User.__table__.columns.keys()
+            for key, value in kwargs.items():
+                if key not in column_names:
+                    raise ValueError
+                setattr(user, key, value)
         self.session.commit()
 
     def all(self):

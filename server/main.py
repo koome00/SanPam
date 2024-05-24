@@ -1,7 +1,7 @@
 """
 Module 3: Flask App
 """
-from flask import Flask, jsonify, request, abort, url_for, redirect
+from flask import Flask, jsonify, request, abort, url_for, redirect, make_response
 from auth import Auth
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import InvalidRequestError
@@ -47,8 +47,8 @@ def login():
     password = request.form.get("password")
     if AUTH.valid_login(email, password):
         session_id = AUTH.create_session(email)
-        res = jsonify({"email": email,
-                      "message": "logged in"})
+        res = make_response(jsonify({"email": email,
+                      "message": f"logged in {session_id}"}))
         res.set_cookie("session_id", session_id)
         return res
     else:
@@ -81,7 +81,6 @@ def profile():
     user = AUTH.get_user_from_session_id(session_id)
     if user is None:
         abort(403)
-    print
     return jsonify({"email": user.email}), 200
 
 
