@@ -1,0 +1,12 @@
+* {
+    box-sizing: border-box;
+}
+navbar ul {
+    list-style-type: none;
+    text-decoration: none;
+    overflow: hidden;
+}
+
+navbar li{
+    float: left;
+}

@@ -30,7 +30,9 @@ def register_users():
     """
     email = request.form.get("email")
     password = request.form.get("password")
-    user = AUTH.register_user(email=email, password=password)
+    # role = request.form.get("role")
+    # username = request.form.get("username")
+    user = AUTH.register_user(email=email, password=password, )
     if user:
         return jsonify({"email": email,
                     "message": f"User {email} created"}), 200

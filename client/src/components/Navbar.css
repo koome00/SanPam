@@ -1,0 +1,59 @@
+nav {
+    text-decoration: none;
+    width: 100%;
+    max-height: 96px;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+ul {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-height: 79px;
+    width: 100%;
+}
+
+ul img {
+    max-height: 79px;
+    max-width: 393;
+}
+
+
+
+li {
+    margin: 0px;
+    padding: 10px;
+}
+
+a {
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s ease 0s;
+    text-align: left;
+    font: normal normal normal 50px/40px Bahnschrift;
+    letter-spacing: 0px;
+    color: #00235A;
+    opacity: 1;
+}
+
+a:hover {
+    color: orange;
+}
+
+#quote-button {
+    background: #F24405 0% 0% no-repeat padding-box;
+    color: #00235A;
+
+}
+
+#quote-button a {
+    text-align: left;
+    font: normal normal bold 30px/42px Bahnschrift;
+    letter-spacing: 0px;
+    color: #00235A;
+    opacity: 1;
+}
